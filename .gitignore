@@ -1,0 +1,25 @@
+# 忽略Python虚拟环境
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 忽略临时文件
+*.tmp
+*.swp
+
+# 忽略编译生成的文件
+build/
+dist/
+*.egg-info/
+
+# 忽略本地配置文件
+config.ini
+
+# 忽略测试数据
+tests/data/*
+
+# 忽略IDE相关文件
+.vscode/
+.idea/
