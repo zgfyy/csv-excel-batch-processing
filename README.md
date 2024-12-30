@@ -3,11 +3,6 @@
 ```markdown
 # CSV/Excel 批量处理工具
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/yourusername/csv-excel-batch-processing/ci.yml?branch=main)](https://github.com/yourusername/csv-excel-batch-processing/actions)
-[![License](https://img.shields.io/github/license/yourusername/csv-excel-batch-processing)](LICENSE)
-[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
-[![Coverage](https://img.shields.io/codecov/c/github/yourusername/csv-excel-batch-processing)](https://codecov.io/gh/yourusername/csv-excel-batch-processing)
-
 ## 项目简介
 
 `csv-excel-batch-processing` 是一个用于批量处理 CSV 和 Excel 文件的工具。它支持多种操作，如合并文件、转换数据类型、处理缺失值等。通过灵活的配置选项，用户可以轻松自定义处理逻辑，满足不同的需求。
