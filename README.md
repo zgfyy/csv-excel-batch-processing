@@ -24,7 +24,7 @@
 首先，克隆本项目的 Git 仓库：
 
 ```bash
-git clone https://github.com/yourusername/csv-excel-batch-processing.git
+git clone https://github.com/zgfyy/csv-excel-batch-processing.git
 cd csv-excel-batch-processing
 ```
 
