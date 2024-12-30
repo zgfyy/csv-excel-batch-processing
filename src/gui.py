@@ -1,71 +1,92 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
-from src.data_processor import process_files
-from src.utils import backup_existing_file, generate_report
+from src.settings import settings
+from src.batch_processor import BatchProcessor
 
-def create_gui():
-    """创建图形用户界面"""
+class SettingsGUI:
+    def __init__(self, root):
+        self.root = root
+        
+        # 创建输入文件夹选择按钮
+        self.input_dir_label = tk.Label(root, text="输入文件夹:")
+        self.input_dir_label.pack()
+        self.input_dir_var = tk.StringVar(value=settings.input_directory)
+        self.input_dir_entry = tk.Entry(root, textvariable=self.input_dir_var, width=50)
+        self.input_dir_entry.pack()
+        self.input_dir_button = tk.Button(root, text="选择文件夹", command=self.select_input_directory)
+        self.input_dir_button.pack()
+        
+        # 创建输出文件选择按钮
+        self.output_file_label = tk.Label(root, text="输出文件:")
+        self.output_file_label.pack()
+        self.output_file_var = tk.StringVar(value=settings.output_file)
+        self.output_file_entry = tk.Entry(root, textvariable=self.output_file_var, width=50)
+        self.output_file_entry.pack()
+        self.output_file_button = tk.Button(root, text="选择文件", command=self.select_output_file)
+        self.output_file_button.pack()
+        
+        # 创建关键列输入框
+        self.key_columns_label = tk.Label(root, text="关键列 (多个列名用空格分隔):")
+        self.key_columns_label.pack()
+        self.key_columns_var = tk.StringVar(value=" ".join(settings.key_columns))
+        self.key_columns_entry = tk.Entry(root, textvariable=self.key_columns_var, width=50)
+        self.key_columns_entry.pack()
+        
+        # 创建跳过错误复选框
+        self.skip_errors_var = tk.BooleanVar(value=settings.skip_errors)
+        self.skip_errors_check = tk.Checkbutton(root, text="跳过错误文件", variable=self.skip_errors_var)
+        self.skip_errors_check.pack()
+        
+        # 创建覆盖输出复选框
+        self.overwrite_output_var = tk.BooleanVar(value=settings.overwrite_output)
+        self.overwrite_output_check = tk.Checkbutton(root, text="覆盖现有文件", variable=self.overwrite_output_var)
+        self.overwrite_output_check.pack()
+        
+        # 创建开始处理按钮
+        self.start_button = tk.Button(root, text="开始处理", command=self.start_processing)
+        self.start_button.pack()
+
+    def select_input_directory(self):
+        """选择输入文件夹"""
+        directory = filedialog.askdirectory()
+        if directory:
+            self.input_dir_var.set(directory)
+            settings.set_setting('DEFAULT', 'input_directory', directory)
+
+    def select_output_file(self):
+        """选择输出文件"""
+        file = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv"), ("Excel files", "*.xlsx *.xls")])
+        if file:
+            self.output_file_var.set(file)
+            settings.set_setting('DEFAULT', 'output_file', file)
+
+    def start_processing(self):
+        """开始处理"""
+        # 更新设置
+        settings.update_settings({
+            'input_directory': self.input_dir_var.get(),
+            'output_file': self.output_file_var.get(),
+            'key_columns': self.key_columns_var.get().split(),
+            'skip_errors': self.skip_errors_var.get(),
+            'overwrite_output': self.overwrite_output_var.get()
+        })
+        
+        # 创建批量处理器并运行
+        processor = BatchProcessor(settings)
+        processor.run()
+        
+        messagebox.showinfo("提示", "处理完成！")
+
+def main():
+    # 创建主窗口
     root = tk.Tk()
-    root.title("CSV/Excel 批量处理工具")
-
-    def select_input_directory():
-        dir_name = filedialog.askdirectory()
-        if dir_name:
-            input_dir_var.set(dir_name)
-
-    def select_output_file():
-        file_name = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv"), ("Excel files", "*.xlsx *.xls")])
-        if file_name:
-            output_file_var.set(file_name)
-
-    def start_processing():
-        input_directory = input_dir_var.get()
-        output_file = output_file_var.get()
-        key_columns = key_columns_var.get().split() if key_columns_var.get() else None
-        skip_errors = skip_errors_var.get()
-        overwrite_output = overwrite_output_var.get()
-
-        if not os.path.isdir(input_directory):
-            messagebox.showerror("错误", "输入的路径不是有效的文件夹。")
-            return
-
-        if not Path(output_file).suffix in ['.csv', '.xlsx', '.xls']:
-            messagebox.showerror("错误", "输出文件格式不正确，请输入有效的文件格式 (.csv, .xlsx, .xls)。")
-            return
-
-        try:
-            process_files(input_directory, output_file, key_columns, skip_errors, overwrite_output)
-            backup_existing_file(output_file)
-            generate_report(output_file)
-            messagebox.showinfo("成功", "处理完成！")
-        except Exception as e:
-            messagebox.showerror("错误", f"处理过程中出现错误: {e}")
-
-    # 创建变量
-    input_dir_var = tk.StringVar()
-    output_file_var = tk.StringVar()
-    key_columns_var = tk.StringVar()
-    skip_errors_var = tk.BooleanVar()
-    overwrite_output_var = tk.BooleanVar()
-
-    # 创建标签和输入框
-    tk.Label(root, text="输入文件夹:").grid(row=0, column=0, padx=10, pady=5)
-    tk.Entry(root, textvariable=input_dir_var, width=50).grid(row=0, column=1, padx=10, pady=5)
-    tk.Button(root, text="选择文件夹", command=select_input_directory).grid(row=0, column=2, padx=10, pady=5)
-
-    tk.Label(root, text="输出文件:").grid(row=1, column=0, padx=10, pady=5)
-    tk.Entry(root, textvariable=output_file_var, width=50).grid(row=1, column=1, padx=10, pady=5)
-    tk.Button(root, text="选择文件", command=select_output_file).grid(row=1, column=2, padx=10, pady=5)
-
-    tk.Label(root, text="关键列 (空格分隔):").grid(row=2, column=0, padx=10, pady=5)
-    tk.Entry(root, textvariable=key_columns_var, width=50).grid(row=2, column=1, padx=10, pady=5)
-
-    tk.Checkbutton(root, text="跳过错误文件", variable=skip_errors_var).grid(row=3, column=1, sticky=tk.W, padx=10, pady=5)
-    tk.Checkbutton(root, text="覆盖现有文件", variable=overwrite_output_var).grid(row=4, column=1, sticky=tk.W, padx=10, pady=5)
-
-    tk.Button(root, text="开始处理", command=start_processing).grid(row=5, column=1, pady=20)
-
+    root.title("CSV/Excel 批量处理工具 - 设置")
+    
+    # 创建设置界面
+    app = SettingsGUI(root)
+    
+    # 运行主循环
     root.mainloop()
 
 if __name__ == "__main__":
-    create_gui()
+    main()
